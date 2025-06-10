@@ -3,11 +3,11 @@
  * ==============================
  * Author: Radipta Basri Wijaya (23106050035)
  * Course: Processing (UAS Assignment)
- * 
+ *
  * Description:
  * Interactive 3D text object displaying "RBW-Tech" with complete
  * transformation controls, lighting system, and real-time interaction.
- * 
+ *
  * Features:
  * - 6DOF transformations (Pitch, Yaw, Roll, Crab, Ped, Zoom)
  * - Mouse-based drag controls
@@ -64,21 +64,28 @@ float mouseSensitivity = 0.5;             // Mouse drag sensitivity
 // VISUAL THEME
 // ============================
 color[] gradientColors = {
-  color(255, 80, 120),   // R - Pink-red
-  color(120, 80, 255),   // B - Purple-blue
-  color(80, 200, 255),   // W - Light blue
-  color(255, 200, 80),   // - - Orange
-  color(80, 255, 120),   // T - Green
-  color(120, 255, 80),   // e - Light green
-  color(80, 255, 200),   // c - Cyan
+  color(255, 80, 120), // R - Pink-red
+  color(120, 80, 255), // B - Purple-blue
+  color(80, 200, 255), // W - Light blue
+  color(255, 200, 80), // - - Orange
+  color(80, 255, 120), // T - Green
+  color(120, 255, 80), // e - Light green
+  color(80, 255, 200), // c - Cyan
   color(200, 255, 80)    // h - Yellow-green
 };
+
+PImage letterTexture;
 
 // ============================
 // INITIALIZATION
 // ============================
 void setup() {
   size(1200, 750, P3D);
+  
+  letterTexture = loadImage("images/texture.jpg");
+  if (letterTexture == null) {
+    letterTexture = loadImage("texture.jpg");
+  }
   
   printControlGuide();
 }
@@ -107,20 +114,20 @@ void printControlGuide() {
 // ============================
 void draw() {
   background(245, 248, 252);
-  
+
   // Process all user inputs
   processKeyboardInput();
   processMouseInput();
-  
+
   // Configure lighting system
   setupLightingSystem();
-  
+
   // Position camera
   camera(camX, camY, camZ, 0, 0, 0, 0, 1, 0);
-  
+
   // Render 3D scene
   render3DScene();
-  
+
   // Render user interface
   renderUI();
 }
@@ -136,11 +143,11 @@ void processKeyboardInput() {
   if (keys['d'] || keys['D']) yaw += rotSpeed;    // Yaw right
   if (keys['q'] || keys['Q']) roll -= rotSpeed;   // Roll left
   if (keys['e'] || keys['E']) roll += rotSpeed;   // Roll right
-  
+
   // Zoom controls (ZX)
   if (keys['z'] || keys['Z']) zoomLevel += zoomSpeed;                    // Zoom in
   if (keys['x'] || keys['X']) zoomLevel = max(0.1, zoomLevel - zoomSpeed); // Zoom out
-  
+
   // Translation controls (Arrow Keys)
   if (specialKeys[0]) pedY -= moveSpeed;    // Up
   if (specialKeys[1]) pedY += moveSpeed;    // Down
@@ -153,20 +160,20 @@ void processMouseInput() {
   if (mousePressed && isDragging && !middlePressed) {
     float deltaX = mouseX - pmouseX_3d;
     float deltaY = mouseY - pmouseY_3d;
-    
+
     switch(dragMode) {
-      case 1: // Left click - Translation
-        crabX += deltaX * mouseSensitivity;
-        pedY += deltaY * mouseSensitivity;
-        break;
-        
-      case 2: // Right click - Rotation
-        yaw += deltaX * mouseSensitivity;
-        pitch += deltaY * mouseSensitivity;
-        break;
+    case 1: // Left click - Translation
+      crabX += deltaX * mouseSensitivity;
+      pedY += deltaY * mouseSensitivity;
+      break;
+
+    case 2: // Right click - Rotation
+      yaw += deltaX * mouseSensitivity;
+      pitch += deltaY * mouseSensitivity;
+      break;
     }
   }
-  
+
   // Handle middle mouse roll control
   if (middlePressed && mousePressed) {
     float deltaY = mouseY - pmouseY_3d;
@@ -178,7 +185,7 @@ void processMouseInput() {
       }
     }
   }
-  
+
   // Update mouse position tracking
   pmouseX_3d = mouseX;
   pmouseY_3d = mouseY;
@@ -202,13 +209,18 @@ void setupLightingSystem() {
 void renderLightSource() {
   pushMatrix();
   translate(lightX, lightY, lightZ);
-  
+
   // Multi-layer glow effect
-  fill(255, 255, 100, 60);  noStroke(); sphere(25); // Outer glow
-  fill(255, 255, 150, 120);             sphere(18); // Middle glow
-  fill(255, 255, 200, 200);             sphere(12); // Inner core
-  fill(255, 255, 255);                  sphere(6);  // Bright center
-  
+  fill(255, 255, 100, 60);
+  noStroke();
+  sphere(25); // Outer glow
+  fill(255, 255, 150, 120);
+  sphere(18); // Middle glow
+  fill(255, 255, 200, 200);
+  sphere(12); // Inner core
+  fill(255, 255, 255);
+  sphere(6);  // Bright center
+
   stroke(1);
   popMatrix();
 }
@@ -218,19 +230,19 @@ void renderLightSource() {
 // ============================
 void render3DScene() {
   pushMatrix();
-  
+
   // Apply all transformations
   scale(zoomLevel);                    // Zoom
   translate(crabX, pedY, 0);          // Translation
   rotateX(radians(pitch));            // Pitch rotation
   rotateY(radians(yaw));              // Yaw rotation
   rotateZ(radians(roll));             // Roll rotation
-  
+
   // Render main object
   renderRBWTechText();
-  
+
   popMatrix();
-  
+
   // Render light source indicator
   if (shadowOn) {
     renderLightSource();
@@ -240,7 +252,7 @@ void render3DScene() {
 void renderRBWTechText() {
   float letterSpacing = 45;  // Spacing for "RBW"
   float techSpacing = 35;    // Spacing for "Tech"
-  
+
   // Apply texture effect
   if (textureOn) {
     stroke(255, 100);
@@ -248,13 +260,13 @@ void renderRBWTechText() {
   } else {
     noStroke();
   }
-  
+
   // Render "RBW-" section
   renderLetter(-3.5 * letterSpacing, gradientColors[0], 'R');
   renderLetter(-2.3 * letterSpacing, gradientColors[1], 'B');
   renderLetter(-1.1 * letterSpacing, gradientColors[2], 'W');
   renderLetter( 0.1 * letterSpacing, gradientColors[3], '-');
-    
+
   // Render "Tech" section
   float techStartX = letterSpacing * 0.8;
   renderLetter(techStartX + 0*techSpacing, gradientColors[4], 'T');
@@ -266,20 +278,96 @@ void renderRBWTechText() {
 void renderLetter(float x, color letterColor, char letter) {
   pushMatrix();
   translate(x, 0, 0);
-  fill(letterColor);
   
+  // Set material properties
+  if (textureOn && letterTexture != null) {
+    // Apply texture with letter color tint
+    tint(red(letterColor), green(letterColor), blue(letterColor));
+  } else {
+    noTint();
+    fill(letterColor);
+  }
+
   switch(letter) {
-    case 'R': drawLetterR(); break;
-    case 'B': drawLetterB(); break;
-    case 'W': drawLetterW(); break;
-    case '-': drawHyphen(); break;
-    case 'T': drawLetterT(); break;
-    case 'e': drawLetterE(); break;
-    case 'c': drawLetterC(); break;
-    case 'h': drawLetterH(); break;
+  case 'R': drawLetterR(); break;
+  case 'B': drawLetterB(); break;
+  case 'W': drawLetterW(); break;
+  case '-': drawHyphen(); break;
+  case 'T': drawLetterT(); break;
+  case 'e': drawLetterE(); break;
+  case 'c': drawLetterC(); break;
+  case 'h': drawLetterH(); break;
   }
   
+  noTint(); // Reset tint
   popMatrix();
+}
+
+// ============================
+// TEXTURED BOX FUNCTION
+// ============================
+void texturedBox(float w, float h, float d) {
+  if (textureOn && letterTexture != null) {
+    // Custom textured box using beginShape
+    float hw = w/2, hh = h/2, hd = d/2;
+    
+    // Front face
+    beginShape();
+    texture(letterTexture);
+    vertex(-hw, -hh, hd, 0, 0);
+    vertex(hw, -hh, hd, letterTexture.width, 0);
+    vertex(hw, hh, hd, letterTexture.width, letterTexture.height);
+    vertex(-hw, hh, hd, 0, letterTexture.height);
+    endShape(CLOSE);
+    
+    // Back face
+    beginShape();
+    texture(letterTexture);
+    vertex(hw, -hh, -hd, 0, 0);
+    vertex(-hw, -hh, -hd, letterTexture.width, 0);
+    vertex(-hw, hh, -hd, letterTexture.width, letterTexture.height);
+    vertex(hw, hh, -hd, 0, letterTexture.height);
+    endShape(CLOSE);
+    
+    // Top face
+    beginShape();
+    texture(letterTexture);
+    vertex(-hw, -hh, -hd, 0, 0);
+    vertex(hw, -hh, -hd, letterTexture.width, 0);
+    vertex(hw, -hh, hd, letterTexture.width, letterTexture.height);
+    vertex(-hw, -hh, hd, 0, letterTexture.height);
+    endShape(CLOSE);
+    
+    // Bottom face
+    beginShape();
+    texture(letterTexture);
+    vertex(-hw, hh, hd, 0, 0);
+    vertex(hw, hh, hd, letterTexture.width, 0);
+    vertex(hw, hh, -hd, letterTexture.width, letterTexture.height);
+    vertex(-hw, hh, -hd, 0, letterTexture.height);
+    endShape(CLOSE);
+    
+    // Left face
+    beginShape();
+    texture(letterTexture);
+    vertex(-hw, -hh, -hd, 0, 0);
+    vertex(-hw, -hh, hd, letterTexture.width, 0);
+    vertex(-hw, hh, hd, letterTexture.width, letterTexture.height);
+    vertex(-hw, hh, -hd, 0, letterTexture.height);
+    endShape(CLOSE);
+    
+    // Right face
+    beginShape();
+    texture(letterTexture);
+    vertex(hw, -hh, hd, 0, 0);
+    vertex(hw, -hh, -hd, letterTexture.width, 0);
+    vertex(hw, hh, -hd, letterTexture.width, letterTexture.height);
+    vertex(hw, hh, hd, 0, letterTexture.height);
+    endShape(CLOSE);
+  } else {
+    // Regular box
+    box(w, h, d);
+  }
 }
 
 // ============================
@@ -287,81 +375,81 @@ void renderLetter(float x, color letterColor, char letter) {
 // ============================
 void drawLetterR() {
   // Vertical spine
-  pushMatrix(); translate(-12, 0, 0); box(6, 50, 15); popMatrix();
+  pushMatrix(); translate(-12, 0, 0); texturedBox(6, 50, 15); popMatrix();
   
   // Horizontal segments
-  pushMatrix(); translate(0, -20, 0); box(20, 6, 15); popMatrix(); // Top
-  pushMatrix(); translate(-2, -2, 0); box(16, 6, 15); popMatrix();  // Middle
+  pushMatrix(); translate(0, -20, 0); texturedBox(20, 6, 15); popMatrix(); // Top
+  pushMatrix(); translate(-2, -2, 0); texturedBox(16, 6, 15); popMatrix();  // Middle
   
   // Right vertical segment
-  pushMatrix(); translate(12, -11, 0); box(6, 18, 15); popMatrix();
+  pushMatrix(); translate(12, -11, 0); texturedBox(6, 18, 15); popMatrix();
   
   // Diagonal leg
-  pushMatrix(); translate(8, 12, 0); rotateZ(radians(35)); box(20, 6, 15); popMatrix();
+  pushMatrix(); translate(8, 12, 0); rotateZ(radians(35)); texturedBox(20, 6, 15); popMatrix();
 }
 
 void drawLetterB() {
   // Vertical spine
-  pushMatrix(); translate(-12, 0, 0); box(6, 50, 15); popMatrix();
+  pushMatrix(); translate(-12, 0, 0); texturedBox(6, 50, 15); popMatrix();
   
   // Horizontal segments
-  pushMatrix(); translate(-2, -20, 0); box(18, 6, 15); popMatrix(); // Top
-  pushMatrix(); translate(-2, -2, 0); box(18, 6, 15); popMatrix();  // Middle
-  pushMatrix(); translate(-2, 20, 0); box(18, 6, 15); popMatrix();  // Bottom
+  pushMatrix(); translate(-2, -20, 0); texturedBox(18, 6, 15); popMatrix(); // Top
+  pushMatrix(); translate(-2, -2, 0); texturedBox(18, 6, 15); popMatrix();  // Middle
+  pushMatrix(); translate(-2, 20, 0); texturedBox(18, 6, 15); popMatrix();  // Bottom
   
   // Right vertical segments
-  pushMatrix(); translate(10, -11, 0); box(6, 18, 15); popMatrix();  // Top
-  pushMatrix(); translate(10, 9, 0); box(6, 22, 15); popMatrix();    // Bottom
+  pushMatrix(); translate(10, -11, 0); texturedBox(6, 18, 15); popMatrix();  // Top
+  pushMatrix(); translate(10, 9, 0); texturedBox(6, 22, 15); popMatrix();    // Bottom
 }
 
 void drawLetterW() {
   // Outer verticals
-  pushMatrix(); translate(-15, 0, 0); box(6, 50, 15); popMatrix();   // Left
-  pushMatrix(); translate(15, 0, 0); box(6, 50, 15); popMatrix();    // Right
+  pushMatrix(); translate(-15, 0, 0); texturedBox(6, 50, 15); popMatrix();   // Left
+  pushMatrix(); translate(15, 0, 0); texturedBox(6, 50, 15); popMatrix();    // Right
   
   // Inner diagonals
-  pushMatrix(); translate(-5, 10, 0); rotateZ(radians(-15)); box(6, 25, 15); popMatrix(); // Left
-  pushMatrix(); translate(5, 10, 0); rotateZ(radians(15)); box(6, 25, 15); popMatrix();   // Right
+  pushMatrix(); translate(-5, 10, 0); rotateZ(radians(-15)); texturedBox(6, 25, 15); popMatrix(); // Left
+  pushMatrix(); translate(5, 10, 0); rotateZ(radians(15)); texturedBox(6, 25, 15); popMatrix();   // Right
 }
 
 void drawHyphen() {
-  pushMatrix(); translate(0, 0, 0); box(20, 6, 15); popMatrix();
+  pushMatrix(); translate(0, 0, 0); texturedBox(20, 6, 15); popMatrix();
 }
 
 void drawLetterT() {
   // Horizontal top
-  pushMatrix(); translate(0, -20, 0); box(30, 6, 15); popMatrix();
+  pushMatrix(); translate(0, -20, 0); texturedBox(30, 6, 15); popMatrix();
   
   // Vertical center
-  pushMatrix(); translate(0, 3, 0); box(6, 34, 15); popMatrix();
+  pushMatrix(); translate(0, 3, 0); texturedBox(6, 34, 15); popMatrix();
 }
 
 void drawLetterE() {
   // Vertical spine
-  pushMatrix(); translate(-8, 0, 0); box(5, 35, 12); popMatrix();
+  pushMatrix(); translate(-8, 0, 0); texturedBox(5, 35, 12); popMatrix();
   
   // Horizontal segments
-  pushMatrix(); translate(2, -15, 0); box(15, 5, 12); popMatrix();   // Top
-  pushMatrix(); translate(0, 0, 0); box(12, 5, 12); popMatrix();     // Middle
-  pushMatrix(); translate(2, 15, 0); box(15, 5, 12); popMatrix();    // Bottom
+  pushMatrix(); translate(2, -15, 0); texturedBox(15, 5, 12); popMatrix();   // Top
+  pushMatrix(); translate(0, 0, 0); texturedBox(12, 5, 12); popMatrix();     // Middle
+  pushMatrix(); translate(2, 15, 0); texturedBox(15, 5, 12); popMatrix();    // Bottom
 }
 
 void drawLetterC() {
   // Vertical spine
-  pushMatrix(); translate(-8, 0, 0); box(5, 30, 12); popMatrix();
+  pushMatrix(); translate(-8, 0, 0); texturedBox(5, 30, 12); popMatrix();
   
   // Horizontal segments
-  pushMatrix(); translate(1, -12, 0); box(13, 5, 12); popMatrix();   // Top
-  pushMatrix(); translate(1, 12, 0); box(13, 5, 12); popMatrix();    // Bottom
+  pushMatrix(); translate(1, -12, 0); texturedBox(13, 5, 12); popMatrix();   // Top
+  pushMatrix(); translate(1, 12, 0); texturedBox(13, 5, 12); popMatrix();    // Bottom
 }
 
 void drawLetterH() {
   // Vertical spines
-  pushMatrix(); translate(-6, 0, 0); box(5, 35, 12); popMatrix();    // Left
-  pushMatrix(); translate(6, 0, 0); box(5, 35, 12); popMatrix();     // Right
+  pushMatrix(); translate(-6, 0, 0); texturedBox(5, 35, 12); popMatrix();    // Left
+  pushMatrix(); translate(6, 0, 0); texturedBox(5, 35, 12); popMatrix();     // Right
   
   // Horizontal crossbar
-  pushMatrix(); translate(0, 0, 0); box(15, 5, 12); popMatrix();
+  pushMatrix(); translate(0, 0, 0); texturedBox(15, 5, 12); popMatrix();
 }
 
 // ============================
@@ -372,9 +460,9 @@ void renderUI() {
   camera();
   hint(DISABLE_DEPTH_TEST);
   noLights();
-  
+
   renderControlPanel();
-  
+
   hint(ENABLE_DEPTH_TEST);
 }
 
@@ -384,18 +472,18 @@ void renderControlPanel() {
   stroke(120, 120, 120);
   strokeWeight(2);
   rect(15, 50, 380, 360, 8);
-  
+
   // Header section
   fill(50, 100, 180, 220);
   noStroke();
   rect(15, 50, 380, 35, 8, 8, 0, 0);
-  
+
   // Panel title
   fill(255, 255, 255);
   textSize(14);
   textAlign(LEFT);
   text("RBW-Tech 3D Control Panel", 25, 72);
-  
+
   // Content sections
   renderControlSections();
   renderStatusDisplay();
@@ -405,10 +493,10 @@ void renderControlPanel() {
 void renderControlSections() {
   fill(20, 20, 20);
   textSize(11);
-  
+
   float lineHeight = 17.5;
   int startY = 100;
-  
+
   // Keyboard controls section
   text("=== KEYBOARD CONTROLS ===", 25, startY);
   text("WASD: Pitch/Yaw (smooth rotation)", 25, startY + lineHeight);
@@ -416,7 +504,7 @@ void renderControlSections() {
   text("Arrow Keys: Crab/Ped (smooth translation)", 25, startY + 3*lineHeight);
   text("Z/X: Zoom in/out (smooth)", 25, startY + 4*lineHeight);
   text("R: Reset all positions", 25, startY + 5*lineHeight);
-  
+
   // Mouse controls section
   text("=== MOUSE CONTROLS ===", 25, startY + 7*lineHeight);
   text("LEFT CLICK + DRAG: Move object around", 25, startY + 8*lineHeight);
@@ -429,10 +517,10 @@ void renderControlSections() {
 void renderStatusDisplay() {
   fill(20, 20, 20);
   textSize(11);
-  
+
   float lineHeight = 17.5;
   int startY = 100;
-  
+
   // Status section
   text("=== CURRENT STATUS ===", 25, startY + 14*lineHeight);
   text("Pitch: " + nf(pitch, 0, 1) + "°", 25, startY + 15*lineHeight);
@@ -446,7 +534,7 @@ void renderStatusDisplay() {
 void renderToggleButtons() {
   float lineHeight = 17.5;
   int startY = 100;
-  
+
   renderButton(25, startY + 18*lineHeight, 150, 25, "Toggle Texture (T)", textureOn, color(30, 120, 255));
   renderButton(200, startY + 18*lineHeight, 180, 25, "Toggle Lighting/Shadow (L)", shadowOn, color(255, 120, 30));
 }
@@ -461,9 +549,9 @@ void renderButton(float x, float y, float w, float h, String label, boolean acti
     stroke(180, 180, 180);
     strokeWeight(1);
   }
-  
+
   rect(x, y, w, h, 6);
-  
+
   // Button text
   fill(active ? color(255, 255, 255) : color(80, 80, 80));
   textAlign(CENTER, CENTER);
@@ -480,16 +568,16 @@ void keyPressed() {
   if (keyCode == DOWN) specialKeys[1] = true;
   if (keyCode == LEFT) specialKeys[2] = true;
   if (keyCode == RIGHT) specialKeys[3] = true;
-  
+
   // Regular keys
   if (key >= 0 && key < keys.length) {
     keys[key] = true;
   }
-  
+
   // Instant toggle functions
   if (key == 't' || key == 'T') textureOn = !textureOn;
   if (key == 'l' || key == 'L') shadowOn = !shadowOn;
-  
+
   // Reset function
   if (key == 'r' || key == 'R') {
     resetAllTransformations();
@@ -502,7 +590,7 @@ void keyReleased() {
   if (keyCode == DOWN) specialKeys[1] = false;
   if (keyCode == LEFT) specialKeys[2] = false;
   if (keyCode == RIGHT) specialKeys[3] = false;
-  
+
   // Regular keys
   if (key >= 0 && key < keys.length) {
     keys[key] = false;
@@ -517,15 +605,15 @@ void mousePressed() {
     pmouseY_3d = mouseY;
     return;
   }
-  
+
   // Check UI button clicks
   if (handleUIButtonClicks()) return;
-  
+
   // Initialize drag operation
   isDragging = true;
   pmouseX_3d = mouseX;
   pmouseY_3d = mouseY;
-  
+
   // Set drag mode
   if (mouseButton == LEFT) dragMode = 1;      // Translation
   else if (mouseButton == RIGHT) dragMode = 2; // Rotation
@@ -533,19 +621,19 @@ void mousePressed() {
 
 boolean handleUIButtonClicks() {
   float buttonY = 100 + 18*17.5;
-  
+
   // Texture button
   if (mouseX >= 25 && mouseX <= 175 && mouseY >= buttonY && mouseY <= buttonY + 25) {
     textureOn = !textureOn;
     return true;
   }
-  
+
   // Lighting button
   if (mouseX >= 200 && mouseX <= 380 && mouseY >= buttonY && mouseY <= buttonY + 25) {
     shadowOn = !shadowOn;
     return true;
   }
-  
+
   return false;
 }
 
@@ -557,7 +645,7 @@ void mouseReleased() {
 
 void mouseWheel(MouseEvent event) {
   float wheelDirection = event.getCount();
-  
+
   // Zoom control
   if (wheelDirection < 0) {
     zoomLevel += 0.1; // Zoom in
@@ -581,7 +669,7 @@ void resetAllTransformations() {
   pitch = yaw = roll = 0;
   crabX = pedY = 0;
   zoomLevel = 1.0;
-  lightX = 100; 
-  lightY = -100; 
+  lightX = 100;
+  lightY = -100;
   lightZ = 100;
 }
